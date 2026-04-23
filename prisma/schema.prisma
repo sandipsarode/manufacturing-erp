@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Admin", "Manager", "Operator"
+  description String?
+  
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  module      String   // e.g., "Users", "Manufacturing", "Inventory"
+  action      String   // e.g., "read", "write", "delete", "all"
+  
+  roles           RolePermission[]
+  userPermissions UserPermission[]
+
+  @@unique([module, action])
+}
+
+model RolePermission {
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  active      Boolean  @default(true)
+  lastLogin   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  roleId      String
+  role        Role     @relation(fields: [roleId], references: [id])
+  
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  language    String   @default("English")
+  timezone    String   @default("UTC")
+
+  workOrders  WorkOrder[] // assigned work orders
+  auditLogs   AuditLog[]
+  permissions UserPermission[]
+}
+
+model UserPermission {
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String   // e.g., "CREATED_USER", "DELETED_BOM"
+  entityType  String   // e.g., "User", "BOM"
+  entityId    String?
+  details     String?  // JSON stringified details
+  createdAt   DateTime @default(now())
+}
+
+// --- Inventory ---
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  sku           String   @unique
+  availableQty  Float    @default(0)
+  reservedQty   Float    @default(0)
+  incomingQty   Float    @default(0)
+  minStockLevel Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bomItems      BOMItem[]       @relation("BOMItems")
+  movements     StockMovement[]
+  
+  bomsAsFinishedGood       BOM[]       @relation("FinishedGood")
+  workOrdersAsFinishedGood WorkOrder[] @relation("WorkOrderFinishedGood")
+}
+
+model StockMovement {
+  id          String       @id @default(cuid())
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id])
+  type        String       // "IN" or "OUT"
+  quantity    Float
+  reference   String?      // e.g., WorkOrder ID or Purchase Order ID
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+}
+
+// --- Manufacturing ---
+model BOM {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  finishedGoodId  String
+  finishedGood    Product   @relation("FinishedGood", fields: [finishedGoodId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  items           BOMItem[]
+  workOrders      WorkOrder[]
+}
+
+model BOMItem {
+  id          String   @id @default(cuid())
+  bomId       String
+  bom         BOM      @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation("BOMItems", fields: [productId], references: [id])
+  quantity    Float
+}
+
+model WorkOrder {
+  id              String   @id @default(cuid())
+  bomId           String
+  bom             BOM      @relation(fields: [bomId], references: [id])
+  finishedGoodId  String
+  finishedGood    Product  @relation("WorkOrderFinishedGood", fields: [finishedGoodId], references: [id])
+  status          String   @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED
+  assignedToId    String?
+  assignedTo      User?    @relation(fields: [assignedToId], references: [id])
+  plannedQty      Float
+  producedQty     Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
