@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -35,13 +36,19 @@ export function Sidebar() {
       <div className="absolute bottom-20 left-0 w-24 h-24 bg-blue-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl pointer-events-none" />
 
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-          <Factory className="h-5 w-5 text-white" />
+      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md overflow-hidden">
+          <Image 
+            src="/si_logo.png" 
+            alt="SPEED Logo" 
+            width={40} 
+            height={40} 
+            className="object-contain p-1"
+          />
         </div>
         <div>
-          <p className="text-white font-bold text-sm leading-none">Manufacturing</p>
-          <p className="text-white/50 text-xs mt-0.5">ERP System</p>
+          <p className="text-white font-black text-sm tracking-tight leading-none uppercase">SPEED</p>
+          <p className="text-blue-400 font-bold text-[10px] mt-1 tracking-[0.2em] uppercase">Innovation</p>
         </div>
       </div>
 
