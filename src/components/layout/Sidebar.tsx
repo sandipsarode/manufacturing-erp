@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -28,6 +28,19 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen bg-gradient-to-b from-[#1e1b4b] via-[#312e81] to-[#4c1d95] flex-shrink-0 relative overflow-hidden">
@@ -76,7 +89,10 @@ export function Sidebar() {
 
       {/* Profile section */}
       <div className="px-3 py-4 border-t border-white/10">
-        <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/10 transition-all cursor-pointer group">
+        <div 
+          onClick={handleLogout}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/10 transition-all cursor-pointer group"
+        >
           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
             AD
           </div>
