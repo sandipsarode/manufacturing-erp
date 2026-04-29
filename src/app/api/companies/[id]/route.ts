@@ -4,12 +4,16 @@ import { getSession } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  context: any
+) {
+  const { id } = context.params;
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
     const company = await prisma.company.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     });
     
     if (!company) {
@@ -23,13 +27,17 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: any
+) {
+  const { id } = context.params;
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
     const data = await req.json();
     const company = await prisma.company.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name: data.name,
         address: data.address,
@@ -53,12 +61,16 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: Request,
+  context: any
+) {
+  const { id } = context.params;
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
     await prisma.company.delete({
-      where: { id: params.id }
+      where: { id: id }
     });
     
     return NextResponse.json({ success: true });

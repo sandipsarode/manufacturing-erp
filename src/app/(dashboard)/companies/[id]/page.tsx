@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, Save, Building, Info, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, Save, Building, Info, CheckCircle2, Image as ImageIcon, Edit } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
