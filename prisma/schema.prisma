@@ -8,13 +8,23 @@ datasource db {
 }
 
 model Company {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String   @unique
+  address         String?
+  taxId           String?
+  city            String?
+  state           String?
+  country         String?
+  currency        String   @default("USD")
+  fiscalYearStart String   @default("January")
+  multiCurrency   Boolean  @default(false)
+  uomAdvanced     Boolean  @default(false)
+  logo            String?
+  isPrimary       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  users     User[]
+  users           User[]
 }
 
 model Role {

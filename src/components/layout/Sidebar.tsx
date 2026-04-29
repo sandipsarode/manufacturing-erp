@@ -13,11 +13,13 @@ import {
   ShieldCheck,
   LogOut,
   ChevronRight,
+  Building,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard",       href: "/dashboard",      icon: LayoutDashboard },
   { name: "User Management", href: "/users",           icon: Users },
+  { name: "Company Management", href: "/companies",    icon: Building },
   { name: "Manufacturing",   href: "/manufacturing",   icon: Factory },
   { name: "Inventory",       href: "/inventory",       icon: Package },
   { name: "Purchases",       href: "/purchases",       icon: ShoppingCart },
