@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,13 @@ import { ChevronLeft, Save, Building, Info, CheckCircle2, Image as ImageIcon, Ed
 import { toast, Toaster } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CompanyViewPage({ params }: { params: Promise<{ id: string }> | any }) {
-  const resolvedParams = params && typeof params.then === 'function' ? use(params) : params;
+export default function CompanyViewPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  console.log("ID:", id);
+  
   const router = useRouter();
-  const isNew = resolvedParams.id === "new";
+  const isNew = id === "new";
   
   const [isEditMode, setIsEditMode] = useState(isNew);
   const [loading, setLoading] = useState(!isNew);
@@ -59,7 +62,7 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
   const fetchCompany = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/companies/${resolvedParams.id}`);
+      const res = await fetch(`/api/companies/${id}`);
       if (res.ok) {
         const data = await res.json();
         const loadedData = {
@@ -79,11 +82,11 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
         setFormData(loadedData);
         setOriginalData(loadedData);
       } else {
-        toast.error("Failed to load company");
-        router.push("/companies");
+        toast.error("Failed to load company details.");
+        // Removed auto-redirect to prevent flickering
       }
     } catch (error) {
-      toast.error("An error occurred");
+      toast.error("An error occurred while loading data.");
     } finally {
       setLoading(false);
     }
@@ -97,7 +100,7 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
 
     try {
       setSaving(true);
-      const url = isNew ? "/api/companies" : `/api/companies/${resolvedParams.id}`;
+      const url = isNew ? "/api/companies" : `/api/companies/${id}`;
       const method = isNew ? "POST" : "PUT";
       
       const res = await fetch(url, {

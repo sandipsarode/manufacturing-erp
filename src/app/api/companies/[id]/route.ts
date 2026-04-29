@@ -6,9 +6,11 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: Request,
-  context: any
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
+  if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
@@ -29,9 +31,11 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  context: any
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
+  if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
@@ -63,9 +67,11 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  context: any
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
+  if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  
   if (!await getSession()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
   try {
