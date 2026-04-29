@@ -136,8 +136,18 @@ export default function CompaniesPage() {
                           size="icon" 
                           className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                           onClick={() => router.push(`/companies/${company.id}`)}
+                          title="View Details"
                         >
                           <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
+                          onClick={() => router.push(`/companies/${company.id}?mode=edit`)}
+                          title="Edit Company"
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>

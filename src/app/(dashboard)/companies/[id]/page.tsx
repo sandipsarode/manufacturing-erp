@@ -33,12 +33,28 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
     logo: "",
     isPrimary: false,
   });
+  
+  const [originalData, setOriginalData] = useState<any>(null);
 
   useEffect(() => {
     if (!isNew) {
       fetchCompany();
     }
+    if (typeof window !== 'undefined' && window.location.search.includes('mode=edit')) {
+      setIsEditMode(true);
+    }
   }, [isNew]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isEditMode && originalData && JSON.stringify(formData) !== JSON.stringify(originalData)) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isEditMode, formData, originalData]);
 
   const fetchCompany = async () => {
     try {
@@ -46,7 +62,7 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
       const res = await fetch(`/api/companies/${resolvedParams.id}`);
       if (res.ok) {
         const data = await res.json();
-        setFormData({
+        const loadedData = {
           name: data.name || "",
           taxId: data.taxId || "",
           address: data.address || "",
@@ -59,7 +75,9 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
           uomAdvanced: data.uomAdvanced || false,
           logo: data.logo || "",
           isPrimary: data.isPrimary || false,
-        });
+        };
+        setFormData(loadedData);
+        setOriginalData(loadedData);
       } else {
         toast.error("Failed to load company");
         router.push("/companies");
@@ -95,6 +113,7 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
           router.push(`/companies/${newCompany.id}`);
         } else {
           setIsEditMode(false);
+          fetchCompany();
         }
       } else {
         const err = await res.json();
@@ -156,7 +175,13 @@ export default function CompanyViewPage({ params }: { params: Promise<{ id: stri
           ) : (
             <>
               {!isNew && (
-                <Button variant="ghost" onClick={() => { setIsEditMode(false); fetchCompany(); }} className="rounded-xl text-gray-500">
+                <Button variant="ghost" onClick={() => { 
+                  if (originalData && JSON.stringify(formData) !== JSON.stringify(originalData)) {
+                    if (!confirm("You have unsaved changes. Are you sure you want to cancel?")) return;
+                  }
+                  setIsEditMode(false); 
+                  if (originalData) setFormData(originalData); 
+                }} className="rounded-xl text-gray-500">
                   Cancel
                 </Button>
               )}
