@@ -10,8 +10,8 @@ import { ChevronLeft, Save, Building, Info, CheckCircle2, Image as ImageIcon, Ed
 import { toast, Toaster } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CompanyViewPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+export default function CompanyViewPage({ params }: { params: Promise<{ id: string }> | any }) {
+  const resolvedParams = params && typeof params.then === 'function' ? use(params) : params;
   const router = useRouter();
   const isNew = resolvedParams.id === "new";
   
