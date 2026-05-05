@@ -83,13 +83,7 @@ const navigation: NavItem[] = [
       { name: "User Management", href: "/users" },
       { name: "Roles & Permissions", href: "/roles" },
       { name: "Company Management", href: "/companies" },
-      {
-        name: "System Settings",
-        children: [
-          { name: "Manufacturing Settings", href: "/settings/manufacturing" },
-          { name: "Email / SMTP Settings", href: "/settings/email" },
-        ],
-      },
+      { name: "System Settings", href: "/settings" },
     ],
   },
 ];
@@ -98,18 +92,12 @@ function SidebarContent({ onMobileItemClick }: { onMobileItemClick?: () => void 
   const pathname = usePathname();
   const router = useRouter();
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const [openSubSection, setOpenSubSection] = useState<string | null>(null);
 
   useEffect(() => {
     navigation.forEach((item) => {
       if (item.subItems) {
         const sectionMatch = item.subItems.some((sub) => {
           if (sub.href) return pathname.startsWith(sub.href);
-          if (sub.children) {
-            const childMatch = sub.children.some((c) => pathname.startsWith(c.href));
-            if (childMatch) setOpenSubSection(sub.name);
-            return childMatch;
-          }
           return false;
         });
         if (sectionMatch) setOpenSection(item.name);
@@ -121,10 +109,6 @@ function SidebarContent({ onMobileItemClick }: { onMobileItemClick?: () => void 
 
   const toggleSection = (name: string) => {
     setOpenSection((prev) => (prev === name ? null : name));
-  };
-
-  const toggleSubSection = (name: string) => {
-    setOpenSubSection((prev) => (prev === name ? null : name));
   };
 
   const handleLogout = async () => {
@@ -168,11 +152,7 @@ function SidebarContent({ onMobileItemClick }: { onMobileItemClick?: () => void 
           const hasSubItems = !!item.subItems;
           const isOpen = openSection === item.name;
           const isActive = hasSubItems
-            ? item.subItems!.some((sub) =>
-                sub.href
-                  ? pathname.startsWith(sub.href)
-                  : sub.children?.some((c) => pathname.startsWith(c.href))
-              )
+            ? item.subItems!.some((sub) => sub.href && pathname.startsWith(sub.href))
             : item.href && pathname.startsWith(item.href);
 
           return (
@@ -229,76 +209,20 @@ function SidebarContent({ onMobileItemClick }: { onMobileItemClick?: () => void 
                   <div className="overflow-hidden">
                     <div className="flex flex-col gap-1 pl-10 pr-2">
                       {item.subItems!.map((sub) => {
-                        // Nested expandable sub-section (e.g. System Settings)
-                        if (sub.children) {
-                          const isSubOpen = openSubSection === sub.name;
-                          const isSubActive = sub.children.some((c) => pathname.startsWith(c.href));
-                          return (
-                            <div key={sub.name} className="flex flex-col">
-                              <button
-                                onClick={() => toggleSubSection(sub.name)}
-                                className={`group/sub flex items-center justify-between rounded-lg py-2 px-3 text-xs font-medium transition-all duration-200 outline-none ${
-                                  isSubActive || isSubOpen
-                                    ? "text-white bg-white/10"
-                                    : "text-white/60 hover:text-white hover:bg-white/5"
-                                }`}
-                              >
-                                <span>{sub.name}</span>
-                                <ChevronRight
-                                  className={`h-3 w-3 transition-transform duration-300 ${
-                                    isSubOpen ? "rotate-90 text-white" : "text-white/40"
-                                  }`}
-                                />
-                              </button>
-                              {/* Level-3 children */}
-                              <div
-                                className={`grid transition-all duration-300 ease-in-out ${
-                                  isSubOpen ? "grid-rows-[1fr] opacity-100 mt-0.5" : "grid-rows-[0fr] opacity-0"
-                                }`}
-                              >
-                                <div className="overflow-hidden">
-                                  <div className="flex flex-col gap-0.5 pl-3 pr-1 pb-1">
-                                    {sub.children.map((child) => {
-                                      const isChildActive = pathname.startsWith(child.href);
-                                      return (
-                                        <Link
-                                          key={child.name}
-                                          href={child.href}
-                                          onClick={onMobileItemClick}
-                                          className={`relative py-1.5 px-3 rounded-md text-[11px] font-medium transition-all duration-200 outline-none ${
-                                            isChildActive
-                                              ? "text-white bg-blue-500/20"
-                                              : "text-white/50 hover:text-white hover:bg-white/5"
-                                          }`}
-                                        >
-                                          {isChildActive && (
-                                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3 bg-blue-400 rounded-r-full" />
-                                          )}
-                                          {child.name}
-                                        </Link>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        }
-                        // Normal link sub-item
                         const isSubActive = sub.href ? pathname.startsWith(sub.href) : false;
                         return (
                           <Link
                             key={sub.name}
                             href={sub.href!}
                             onClick={onMobileItemClick}
-                            className={`relative py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 outline-none ${
+                            className={`relative flex items-center py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 outline-none ${
                               isSubActive
                                 ? "text-white bg-white/10"
                                 : "text-white/60 hover:text-white hover:bg-white/5"
                             }`}
                           >
                             {isSubActive && (
-                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-400 rounded-r-full" />
+                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-400 rounded-r-full shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
                             )}
                             {sub.name}
                           </Link>
